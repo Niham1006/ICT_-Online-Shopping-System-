@@ -2,6 +2,7 @@ let users = [];
 let cart = [];
 let currentUser = null;
 
+
 const products = [
   { name: "Rice", price: 70, image: "images/rice.jpg" },
   { name: "Oil", price: 160, image: "images/oil.jpg" },
@@ -15,7 +16,9 @@ const products = [
   { name: "Tea", price: 120, image: "images/tea.jpg" }
 ];
 
-document.getElementById("auth-btn").addEventListener("click", function () {
+
+
+document.getElementById("auth-btn").addEventListener("click", async function () {
   const username = document.getElementById("username").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
@@ -36,10 +39,13 @@ document.getElementById("auth-btn").addEventListener("click", function () {
     users.push({ username, email, password });
     alert("Account created successfully! You can now log in.");
     switchToLogin();
+
   } else {
+   
     const user = users.find(
       (user) => user.username === username && user.password === password
     );
+
     if (user) {
       currentUser = user;
       document.getElementById("auth-section").style.display = "none";
@@ -47,10 +53,36 @@ document.getElementById("auth-btn").addEventListener("click", function () {
       document.getElementById("home").style.display = "block";
       renderProducts();
     } else {
-      alert("Invalid credentials.");
+    
+      try {
+        const res = await fetch('http://localhost:3000/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert("Login successful (from backend)!");
+          currentUser = { username, password };
+          document.getElementById("auth-section").style.display = "none";
+          document.getElementById("sidebarToggle").style.display = "block";
+          document.getElementById("home").style.display = "block";
+          renderProducts();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error("Error connecting to backend:", err);
+        alert("Server error. Try again later.");
+      }
     }
   }
 });
+
+
+
 
 document.getElementById("toggle-link").addEventListener("click", function () {
   const formTitle = document.getElementById("form-title").textContent;

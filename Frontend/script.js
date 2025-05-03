@@ -47,30 +47,24 @@ document.getElementById("auth-btn").addEventListener("click", async () => {
       alert("Server error. Try again later.");
     }
   } else {
-    const user = users.find(user => user.username === username && user.password === password);
-    if (user) {
-      loginSuccess(user);
-    } else {
-      try {
-        const res = await fetch(`${apiURL}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-        if (data.success) {
-          loginSuccess({ username, password });
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        console.error("Error connecting to backend:", err);
-        alert("Server error. Try again later.");
+    try {
+      const res = await fetch(`${apiURL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        loginSuccess({ username });
+      } else {
+        alert(data.message);
       }
+    } catch (err) {
+      console.error("Error connecting to backend:", err);
+      alert("Server error. Try again later.");
     }
   }
 });
-
 
 function loginSuccess(user) {
   currentUser = user;
@@ -196,6 +190,7 @@ function updatePayment() {
       });
   }
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   const proceedButton = document.getElementById("proceed-to-pay");
 

@@ -129,7 +129,12 @@ async function addToCart(product) {
     await fetch(`${apiURL}/cart`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(product)
+      body: JSON.stringify({
+        username: currentUser.username,
+        name: product.name,
+        price: product.price,
+        image: product.image
+      })
     });
     showCart();
   } catch (err) {
@@ -139,7 +144,7 @@ async function addToCart(product) {
 
 async function showCart() {
   try {
-    const res = await fetch(`${apiURL}/cart`);
+    const res = await fetch(`${apiURL}/cart?username=${currentUser.username}`);
     const cartItems = await res.json();
     const cartList = document.getElementById("cart-items");
     const totalPrice = document.getElementById("total-price");
@@ -147,15 +152,15 @@ async function showCart() {
     cartList.innerHTML = "";
     let total = 0;
 
-    cartItems.forEach((item, index) => {
+    cartItems.forEach((item) => {
       const li = document.createElement("li");
       li.innerHTML = `
-        <img src="${item.image}" alt="${item.name}" class="cart-product-image" />
-        <span>${item.name}</span> - <span>${item.price} Tk</span>
-        <button onclick="removeFromCart(${index})">Remove</button>
+        <img src="${item.image}" alt="${item.product_name}" class="cart-product-image" />
+        <span>${item.product_name}</span> - <span>${item.price} Tk</span>
+        <button onclick="removeFromCart(${item.id})">Remove</button>
       `;
       cartList.appendChild(li);
-      total += item.price;
+      total += Number(item.price);
     });
 
     totalPrice.textContent = total;
@@ -164,9 +169,9 @@ async function showCart() {
   }
 }
 
-async function removeFromCart(index) {
+async function removeFromCart(id) {
   try {
-    await fetch(`${apiURL}/cart/${index}`, {
+    await fetch(`${apiURL}/cart/${id}`, {
       method: 'DELETE'
     });
     showCart();
@@ -178,11 +183,11 @@ async function removeFromCart(index) {
 function updatePayment() {
   const totalElement = document.getElementById("payment-total");
   if (totalElement) {
-    fetch(`${apiURL}/cart`)
+    fetch(`${apiURL}/cart?username=${currentUser.username}`)
       .then(res => res.json())
       .then(cartItems => {
-        const total = cartItems.reduce((sum, item) => sum + item.price, 0);
-        totalElement.textContent = total;
+        const total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+        totalElement.textContent = total.toFixed(2);
       })
       .catch(err => {
         console.error("Error updating payment:", err);
@@ -212,42 +217,53 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      fetch('/cart')
+      fetch(`${apiURL}/cart?username=${currentUser.username}`)
         .then(res => res.json())
         .then(cartItems => {
+          
+          if (!Array.isArray(cartItems) || cartItems.length === 0) {
+            alert("Cart is empty or failed to load.");
+            return;
+          }
+
           const orderDetails = {
+            username: currentUser?.username || "guest",
             name,
             phone,
             address,
-            items: cartItems,
             paymentMethod: method,
-            time: new Date().toLocaleString()
+            
           };
 
-          fetch('/save-order', {
+          fetch(`${apiURL}/save-order`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderDetails)
           })
           .then(res => res.text())
           .then(msg => {
             alert(msg);
-            clearCart(); 
+            clearCart();
           })
-          .catch(err => console.error('Error saving order:', err));
+          .catch(err => {
+            console.error('Error saving order:', err);
+            alert("Order failed to submit.");
+          });
+        })
+        .catch(err => {
+          console.error("Error fetching cart:", err);
+          alert("Failed to load cart items.");
         });
     });
   }
 });
 
 function clearCart() {
-  fetch('/cart')
+  fetch(`${apiURL}/cart?username=${currentUser.username}`)
     .then(res => res.json())
     .then(cart => {
       for (let i = cart.length - 1; i >= 0; i--) {
-        fetch(`/cart/${i}`, { method: 'DELETE' });
+        fetch(`${apiURL}/cart/${cart[i].id}`, { method: 'DELETE' });
       }
     });
 }

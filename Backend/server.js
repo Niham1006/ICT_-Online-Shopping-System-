@@ -92,87 +92,97 @@ app.post('/signup', (req, res) => {
 
 
 // ------------------------- ORDER SAVE -------------------------
+
 app.post('/save-order', (req, res) => {
-  const orderDetails = req.body;
+  const { username, name, phone, address, paymentMethod } = req.body;
 
-  fs.readFile('orders.json', (err, data) => {
-    if (err && err.code !== 'ENOENT') {
-      return res.status(500).send('Error reading orders file.');
+  if (!username || !name || !phone || !address || !paymentMethod) {
+    return res.status(400).send("Missing order fields.");
+  }
+
+  db.query('SELECT * FROM cart WHERE username = ?', [username], (err, cartItems) => {
+    if (err) {
+      console.error('❌ Error fetching cart for order:', err);
+      return res.status(500).send('Failed to fetch cart items.');
     }
 
-    let orders = [];
-    if (data.length) {
-      orders = JSON.parse(data);
-    }
+    if (!cartItems.length) return res.status(400).send('Cart is empty.');
 
-    orders.push(orderDetails);
+    const totalPrice = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
 
-    fs.writeFile('orders.json', JSON.stringify(orders, null, 2), (err) => {
+    const orderItems = cartItems.map(item => item.product_name).join(', '); 
+
+    const orderQuery = `
+      INSERT INTO orders (username, name, phone, address, payment_method, items, total_price, order_time)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(orderQuery, [
+      username,
+      name,
+      phone,
+      address,
+      paymentMethod,
+      orderItems,
+      totalPrice,
+      new Date()
+    ], (err) => {
       if (err) {
-        return res.status(500).send('Error writing to orders file.');
+        console.error('❌ Failed to save order:', err);
+        return res.status(500).send('Order not saved.');
       }
 
-      res.status(200).send('Order saved successfully.');
+      clearCartForUser(username);
+      res.status(200).send('✅ Order placed successfully and cart cleared.');
     });
   });
 });
 
+
 // ------------------------- CART SYSTEM -------------------------
 
-const cartPath = path.join(__dirname, 'cart.json');
-
 app.get('/cart', (req, res) => {
-  fs.readFile(cartPath, 'utf-8', (err, data) => {
+  const { username } = req.query;
+
+  db.query('SELECT * FROM cart WHERE username = ?', [username], (err, results) => {
     if (err) {
-      return res.json([]);
+      console.error('❌ Error fetching cart:', err);
+      return res.status(500).json({ message: 'Failed to load cart' });
     }
-    res.json(JSON.parse(data));
+    res.json(results);
   });
 });
 
 app.post('/cart', (req, res) => {
-  const newItem = req.body;
+  const { username, name, price, image } = req.body;
 
-  fs.readFile(cartPath, 'utf-8', (err, data) => {
-    let cart = [];
-    if (!err && data.length > 0) {
-      cart = JSON.parse(data);
+  const query = 'INSERT INTO cart (username, product_name, price, image) VALUES (?, ?, ?, ?)';
+  db.query(query, [username, name, price, image], (err) => {
+    if (err) {
+      console.error('❌ Error adding to cart:', err);
+      return res.status(500).json({ message: 'Failed to add to cart' });
     }
-
-    cart.push(newItem);
-
-    fs.writeFile(cartPath, JSON.stringify(cart, null, 2), (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Failed to save cart' });
-      }
-      res.json({ message: 'Item added to cart' });
-    });
+    res.json({ message: 'Item added to cart' });
   });
 });
 
-app.delete('/cart/:index', (req, res) => {
-  const index = parseInt(req.params.index);
+app.delete('/cart/:id', (req, res) => {
+  const id = req.params.id;
 
-  fs.readFile(cartPath, 'utf-8', (err, data) => {
-    if (err || !data.length) {
-      return res.status(500).json({ message: 'Error reading cart' });
+  db.query('DELETE FROM cart WHERE id = ?', [id], (err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to delete item' });
     }
-
-    let cart = JSON.parse(data);
-    if (index >= 0 && index < cart.length) {
-      cart.splice(index, 1);
-
-      fs.writeFile(cartPath, JSON.stringify(cart, null, 2), (err) => {
-        if (err) {
-          return res.status(500).json({ message: 'Failed to update cart' });
-        }
-        res.json({ message: 'Item removed' });
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid index' });
-    }
+    res.json({ message: 'Item removed' });
   });
 });
+
+function clearCartForUser(username) {
+  db.query('DELETE FROM cart WHERE username = ?', [username], (err) => {
+    if (err) console.error('❌ Error clearing cart:', err);
+  });
+}
+
 
 // ------------------------- SERVER START -------------------------
 app.listen(port, () => {

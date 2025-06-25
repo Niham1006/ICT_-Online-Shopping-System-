@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel</title>
+<link rel="stylesheet" href="adminstyles.css" />
+</head>
+<body>
+  <!-- Auth Section -->
+  <div id="admin-auth" class="auth-form">
+    <h2>Admin Login</h2>
+    <input type="text" id="admin-username" placeholder="Admin Username" />
+    <input type="password" id="admin-password" placeholder="Password" />
+    <button id="admin-login-btn">Login</button>
+  </div>
+
+  <!-- Sidebar -->
+  <button id="sidebarToggle" style="display:none;">☰</button>
+  <div id="sidebar" class="sidebar">
+    <ul>
+      <li onclick="showSection('products-panel')">Manage Products</li>
+      <li onclick="showSection('users-orders-panel')">Users & Orders</li>
+    </ul>
+  </div>
+
+  <!-- Products Panel -->
+  <div id="products-panel" class="page" style="display:none;">
+    <h2>Manage Products</h2>
+    <div id="product-list" class="product-container"></div>
+  </div>
+
+  <!-- Users & Orders Panel -->
+  <div id="users-orders-panel" class="page" style="display:none;">
+    <h2>Users</h2>
+    <ul id="user-list"></ul>
+    <h2>Orders</h2>
+    <ul id="order-list"></ul>
+  </div>
+
+  <script src="adminscript.js"></script>
+</body>
+</html>

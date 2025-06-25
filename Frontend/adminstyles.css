@@ -1,0 +1,101 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #1e1e1e;
+  color: #f1f1f1;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-form {
+  max-width: 350px;
+  margin: 80px auto;
+  padding: 20px;
+  background: #2a2a2a;
+  border-radius: 10px;
+  text-align: center;
+}
+.auth-form input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  background: #3a3a3a;
+  border: none;
+  color: white;
+  border-radius: 5px;
+}
+.auth-form button {
+  padding: 10px 20px;
+  background: #3498db;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#sidebarToggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #3498db;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+.sidebar {
+  width: 200px;
+  background: #2c2c2c;
+  height: 100vh;
+  position: fixed;
+  left: -200px;
+  top: 0;
+  padding-top: 60px;
+  transition: left 0.3s;
+}
+.sidebar.show { left: 0; }
+.sidebar ul { list-style: none; padding: 0; }
+.sidebar ul li {
+  padding: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #444;
+}
+
+.page {
+  padding: 20px;
+  margin-left: 210px;
+}
+.product-container { display: flex; flex-wrap: wrap; gap: 20px; }
+.product-card {
+  background: #2c2c2c;
+  padding: 10px;
+  border-radius: 10px;
+  width: 180px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  text-align: center;
+}
+.product-card input {
+  width: 80%;
+  margin: 5px 0;
+  padding: 5px;
+  background: #444;
+  border: none;
+  color: white;
+  border-radius: 3px;
+}
+.product-card button {
+  padding: 8px;
+  background: #3498db;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#user-list, #order-list {
+  background: #2c2c2c;
+  padding: 10px;
+  border-radius: 8px;
+}
+#user-list li, #order-list li {
+  padding: 8px;
+  border-bottom: 1px solid #444;
+}

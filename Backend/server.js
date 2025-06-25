@@ -183,6 +183,30 @@ function clearCartForUser(username) {
   });
 }
 
+// ------------------------- ADMIN LOGIN -------------------------
+app.post('/admin/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: 'Username and password are required' });
+  }
+
+  const sql = 'SELECT * FROM admins WHERE username = ? AND password = ?';
+  db.query(sql, [username, password], (err, results) => {
+    if (err) {
+      console.error('Admin login query error:', err);  
+      return res.status(500).json({ success: false, message: err.message }); 
+    }
+
+    if (results.length > 0) {
+      res.json({ success: true, username: results[0].username });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+  });
+});
+
+
 
 // ------------------------- SERVER START -------------------------
 app.listen(port, () => {

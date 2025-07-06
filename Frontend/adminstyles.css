@@ -99,3 +99,20 @@ body {
   padding: 8px;
   border-bottom: 1px solid #444;
 }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.data-table th, .data-table td {
+  border: 1px solid #444;
+  padding: 0.5rem;
+  text-align: left;
+  background: #2c2c2c;
+  color: #f1f1f1;
+}
+.data-table th {
+  background: #444;
+  font-weight: bold;
+}

@@ -4,18 +4,36 @@ let currentUser = null;
 
 const apiURL = 'http://localhost:3000'; 
 
-const products = [
-  { name: "Rice", price: 70, image: "images/rice.jpg" },
-  { name: "Oil", price: 160, image: "images/oil.jpg" },
-  { name: "Potato", price: 30, image: "images/potato.jpg" },
-  { name: "Tomato", price: 50, image: "images/tomato.jpg" },
-  { name: "Onion", price: 40, image: "images/onion.jpg" },
-  { name: "Milk", price: 90, image: "images/milk.jpg" },
-  { name: "Salt", price: 20, image: "images/salt.jpg" },
-  { name: "Sugar", price: 50, image: "images/sugar.jpg" },
-  { name: "Flour", price: 60, image: "images/flour.jpg" },
-  { name: "Tea", price: 120, image: "images/tea.jpg" }
-];
+async function renderProducts() {
+  const productsContainer = document.getElementById("products");
+  productsContainer.innerHTML = "";
+
+  try {
+    const res = await fetch(`${apiURL}/products`);
+    const products = await res.json();
+
+    if (!Array.isArray(products) || products.length === 0) {
+      productsContainer.innerHTML = "<p>No products available.</p>";
+      return;
+    }
+
+    products.forEach((product) => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <img src="${apiURL}/${product.image}" alt="${product.name}" class="product-image" />
+        <h3>${product.name}</h3>
+        <p>${product.price} Tk</p>
+        <p>Stock: ${product.stock}</p>
+        <button onclick='addToCart(${JSON.stringify(product)})'>Add to Cart</button>
+      `;
+      productsContainer.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    productsContainer.innerHTML = "<p>Failed to load products.</p>";
+  }
+}
 
 document.getElementById("auth-btn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
@@ -106,22 +124,6 @@ function showSection(sectionId) {
 
   if (sectionId === "cart") showCart();
   if (sectionId === "payment") updatePayment();
-}
-
-function renderProducts() {
-  const productsContainer = document.getElementById("products");
-  productsContainer.innerHTML = "";
-  products.forEach((product, index) => {
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" class="product-image" />
-      <h3>${product.name}</h3>
-      <p>${product.price} Tk</p>
-      <button onclick="addToCart(products[${index}])">Add to Cart</button>
-    `;
-    productsContainer.appendChild(card);
-  });
 }
 
 async function addToCart(product) {

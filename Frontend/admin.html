@@ -14,11 +14,14 @@
     <button id="admin-login-btn">Login</button>
   </div>
 
+<a href="index.html" id="client-link" class="switch-link">← Client Panel</a>
+
   <button id="sidebarToggle" style="display:none;">☰</button>
   <div id="sidebar" class="sidebar" style="display:none;">
     <ul>
       <li onclick="showSection('products-panel')">Manage Products</li>
       <li onclick="showSection('users-orders-panel')">Users & Orders</li>
+      <li onclick="showSection('review-panel')">User Reviews</li>
     </ul>
   </div>
 
@@ -48,6 +51,23 @@
       <tbody id="order-list"></tbody>
     </table>
   </div>
+
+<div id="review-panel" class="page" style="display: none;">
+  <h2>User Reviews</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Review</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="review-list"></tbody>
+  </table>
+</div>
+
+<button id="admin-logout" class="logout-btn" style="display:none;">Logout</button>
 
   <script src="adminscript.js"></script>
 </body>

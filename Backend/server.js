@@ -233,9 +233,6 @@ app.post('/admin/login', (req, res) => {
       console.error('Admin login query error:', err); 
       return res.status(500).json({ success: false, message: err.message }); 
     }
-
-    console.log('Query results:', results); 
-
     if (results.length > 0) {
       res.json({ success: true, username: results[0].username });
     } else {
@@ -306,6 +303,36 @@ app.get('/products', (req, res) => {
     if (err) {
       console.error('Error fetching products:', err);
       return res.status(500).json({ message: 'Failed to fetch products' });
+    }
+    res.json(results);
+  });
+});
+
+// ------------------------- POST a new review -------------------------
+app.post('/submit-review', (req, res) => {
+  const { username, review } = req.body;
+
+  if (!username || !review) {
+    return res.status(400).json({ success: false, message: 'Missing data' });
+  }
+
+  const sql = 'INSERT INTO reviews (username, review) VALUES (?, ?)';
+  db.query(sql, [username, review], (err, result) => {
+    if (err) {
+      console.error('Error saving review:', err);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    res.json({ success: true, message: 'Review submitted' });
+  });
+});
+
+// ------------------------- GET all reviews (admin view) -------------------------
+app.get('/admin/reviews', (req, res) => {
+  const sql = 'SELECT * FROM reviews ORDER BY review_time DESC';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching reviews:', err);
+      return res.status(500).json({ success: false, message: 'Error loading reviews' });
     }
     res.json(results);
   });

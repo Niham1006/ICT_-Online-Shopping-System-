@@ -42,10 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function showSection(sectionId) {
   document.querySelectorAll('.page').forEach(page => (page.style.display = 'none'));
   document.getElementById(sectionId).style.display = 'block';
+  document.getElementById("client-link").style.display = "none";
+  document.getElementById("admin-logout").style.display = "block";
+
 
   if (sectionId === 'products-panel') loadProducts();
   if (sectionId === 'users-orders-panel') loadUsersAndOrders();
+  if (sectionId === 'review-panel') loadReviews(); // NEW
+  
 }
+
 
 async function loadProducts() {
   try {
@@ -130,3 +136,33 @@ async function loadUsersAndOrders() {
     console.error('Error loading users or orders:', err);
   }
 }
+
+async function loadReviews() {
+  try {
+    const res = await fetch(`${apiURL}/admin/reviews`);
+    const reviews = await res.json();
+    const list = document.getElementById('review-list');
+    list.innerHTML = '';
+
+    reviews.forEach(r => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${r.id}</td>
+        <td>${r.username}</td>
+        <td>${r.review}</td>
+        <td>${new Date(r.review_time).toLocaleString()}</td>
+      `;
+      list.appendChild(row);
+    });
+  } catch (err) {
+    console.error('Error loading reviews:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById("client-link").style.display = "block";
+});
+
+document.getElementById("admin-logout").addEventListener("click", () => {
+  location.reload();
+});

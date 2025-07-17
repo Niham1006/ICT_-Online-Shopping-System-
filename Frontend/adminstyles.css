@@ -116,3 +116,43 @@ body {
   background: #444;
   font-weight: bold;
 }
+
+.switch-link {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: linear-gradient(to right, #2980b9, #2ecc71);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  z-index: 999;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s, transform 0.2s;
+}
+
+.switch-link:hover {
+  background: linear-gradient(to right, #3498db, #27ae60);
+  transform: scale(1.05);
+}
+
+.logout-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: linear-gradient(to right, #c0392b, #e74c3c);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(to right, #922b21, #c0392b);
+}

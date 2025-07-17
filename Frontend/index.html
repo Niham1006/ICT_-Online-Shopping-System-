@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+
+<a href="admin.html" id="admin-link" class="switch-link">Admin Panel →</a>
+
+
+
   <div id="auth-section">
     <div class="auth-form">
       <h2 id="form-title">Login</h2>
@@ -26,6 +31,8 @@
       <li onclick="showSection('home')">Home</li>
       <li onclick="showSection('cart')">Cart</li>
       <li onclick="showSection('payment')">Payment</li>
+      <li onclick="showSection('review-section')">Review</li>
+
     </ul>
   </div>
 
@@ -60,12 +67,16 @@
     <button id="proceed-to-pay">Proceed to Pay</button>
   </div>
 
-  <script src="script.js"></script>
+<div id="review-section" class="page" style="display: none; padding: 20px;">
+  <h3>Leave a Review</h3>
+  <textarea id="review-text" rows="4" cols="50" placeholder="Write your review here..." style="width: 100%;"></textarea>
+  <button onclick="submitReview()">Submit Review</button>
+</div>
 
- 
-<p style="text-align:center; margin:20px 0;">
-  <a href="admin.html" style="color:#58a6ff; text-decoration:underline;">Admin Login</a>
-</p>
+<button id="client-logout" class="logout-btn" style="display:none;">Logout</button>
+
+
+  <script src="script.js"></script>
 
 </body>
 </html>

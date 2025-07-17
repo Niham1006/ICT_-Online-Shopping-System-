@@ -90,6 +90,8 @@ function loginSuccess(user) {
   document.getElementById("auth-section").style.display = "none";
   document.getElementById("sidebarToggle").style.display = "block";
   document.getElementById("home").style.display = "block";
+  document.getElementById("admin-link").style.display = "none";
+  document.getElementById("client-logout").style.display = "block";
   renderProducts();
 }
 
@@ -286,4 +288,42 @@ document.addEventListener("DOMContentLoaded", () => {
     cartSection.style.display = "none";
     paymentSection.style.display = "block";
   });
+});
+
+function submitReview() {
+  const review = document.getElementById("review-text").value.trim();
+  if (!review) {
+    alert("Please write something in your review.");
+    return;
+  }
+
+  fetch(`${apiURL}/submit-review`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: currentUser?.username || 'guest',
+      review
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("Thanks for your review!");
+        document.getElementById("review-text").value = '';
+      } else {
+        alert(data.message || "Failed to submit review.");
+      }
+    })
+    .catch(err => {
+      console.error("Error submitting review:", err);
+      alert("Server error.");
+    });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("admin-link").style.display = "block";
+});
+
+document.getElementById("client-logout").addEventListener("click", () => {
+  localStorage.removeItem("currentUser");
+  location.reload(); 
 });

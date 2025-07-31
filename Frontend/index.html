@@ -10,9 +10,20 @@
 
 <a href="admin.html" id="admin-link" class="switch-link">Admin Panel →</a>
 
-
-
   <div id="auth-section">
+    <div id="login-info" class="login-info">
+  <h1><span class="logo-highlight">Online Grocery Shop</span></h1>
+  <p class="tagline">Freshness at Your Fingertips.</p>
+  <ul class="features-list">
+    <li>🛒 Over 100+ Daily Essentials</li>
+    <li>🚚 Fast & Safe Home Delivery</li>
+    <li>💳 Secure Checkout & Easy Payments</li>
+    <li>🧾 Track Orders & Save History</li>
+    <li>📦 Bulk Discounts for Regular Buyers</li>
+  </ul>
+  <div class="info-footer">Sign up or log in to start shopping smarter!</div>
+</div>
+
     <div class="auth-form">
       <h2 id="form-title">Login</h2>
       <input type="text" id="username" placeholder="Username" />
@@ -25,13 +36,21 @@
     </div>
   </div>
 
+<section id="scroll-banner" class="scroll-banner">
+    <h2>Available Grocery Products</h2>
+  <div class="scroll-container">
+    <div class="scroll-track" id="scroll-track">
+    </div>
+  </div>
+</section>
+
   <button id="sidebarToggle" style="display: none;">☰</button>
   <div id="sidebar" class="sidebar">
     <ul>
       <li onclick="showSection('home')">Home</li>
       <li onclick="showSection('cart')">Cart</li>
       <li onclick="showSection('payment')">Payment</li>
-      <li onclick="showSection('review-section')">Review</li>
+      <li onclick="showSection('review-section')">Complaint</li>
 
     </ul>
   </div>
@@ -68,13 +87,12 @@
   </div>
 
 <div id="review-section" class="page" style="display: none; padding: 20px;">
-  <h3>Leave a Review</h3>
-  <textarea id="review-text" rows="4" cols="50" placeholder="Write your review here..." style="width: 100%;"></textarea>
-  <button onclick="submitReview()">Submit Review</button>
+  <h3>Complaint Box</h3>
+  <textarea id="review-text" rows="4" cols="50" placeholder="Write your complaint here..." style="width: 100%;"></textarea>
+  <button onclick="submitReview()">Submit</button>
 </div>
 
 <button id="client-logout" class="logout-btn" style="display:none;">Logout</button>
-
 
   <script src="script.js"></script>
 

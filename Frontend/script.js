@@ -2,7 +2,7 @@ let users = [];
 let cart = [];
 let currentUser = null;
 
-const apiURL = 'http://localhost:3000'; 
+const apiURL = 'http://localhost:3000';
 
 async function renderProducts() {
   const productsContainer = document.getElementById("products");
@@ -25,6 +25,7 @@ async function renderProducts() {
         <h3>${product.name}</h3>
         <p>${product.price} Tk</p>
         <p>Stock: ${product.stock}</p>
+        <input type="number" id="qty-${product.id}" value="1" min="1" max="${product.stock}" />
         <button onclick='addToCart(${JSON.stringify(product)})'>Add to Cart</button>
       `;
       productsContainer.appendChild(card);
@@ -88,10 +89,17 @@ function loginSuccess(user) {
   currentUser = user;
   localStorage.setItem("currentUser", JSON.stringify(user));
   document.getElementById("auth-section").style.display = "none";
+  document.getElementById("login-info").style.display = "none"; 
   document.getElementById("sidebarToggle").style.display = "block";
   document.getElementById("home").style.display = "block";
   document.getElementById("admin-link").style.display = "none";
   document.getElementById("client-logout").style.display = "block";
+
+  const scrollBanner = document.getElementById("scroll-banner");
+  if (scrollBanner) {
+    scrollBanner.style.display = "none";
+  }
+
   renderProducts();
 }
 
@@ -129,20 +137,45 @@ function showSection(sectionId) {
 }
 
 async function addToCart(product) {
+  if (!currentUser || !currentUser.username) {
+    alert("Please login first to add items to cart.");
+    return;
+  }
+
+  const qtyInput = document.getElementById(`qty-${product.id}`);
+  const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+
+  if (isNaN(quantity) || quantity < 1) {
+    alert("Please enter a valid quantity (minimum 1).");
+    return;
+  }
+
   try {
-    await fetch(`${apiURL}/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: currentUser.username,
-        name: product.name,
-        price: product.price,
-        image: product.image
-      })
-    });
-    showCart();
+    for (let i = 0; i < quantity; i++) {
+      const res = await fetch(`${apiURL}/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUser.username,
+          name: product.name,
+          price: product.price,
+          image: product.image
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(`Failed to add item ${i + 1}: ${data.message || 'Unknown error'}`);
+        return;
+      }
+    }
+
+    alert(`Added ${quantity} ${product.name} to cart successfully!`);
+    showCart(); 
+
   } catch (err) {
     console.error("Error adding to cart:", err);
+    alert("Failed to add to cart due to server error.");
   }
 }
 
@@ -161,7 +194,7 @@ async function showCart() {
       li.innerHTML = `
         <img src="${item.image}" alt="${item.product_name}" class="cart-product-image" />
         <span>${item.product_name}</span> - <span>${item.price} Tk</span>
-        <button onclick="removeFromCart(${item.id})">Remove</button>
+        <button onclick="removeFromCart(${item.id}, '${item.product_name}')">Remove</button>
       `;
       cartList.appendChild(li);
       total += Number(item.price);
@@ -173,14 +206,16 @@ async function showCart() {
   }
 }
 
-async function removeFromCart(id) {
+async function removeFromCart(id, productName) {
   try {
-    await fetch(`${apiURL}/cart/${id}`, {
+    const res = await fetch(`${apiURL}/cart/${id}?productName=${encodeURIComponent(productName)}`, {
       method: 'DELETE'
     });
+    if (!res.ok) throw new Error('Delete failed');
     showCart();
   } catch (err) {
     console.error("Error removing from cart:", err);
+    alert("Failed to remove item from cart.");
   }
 }
 
@@ -190,7 +225,7 @@ function updatePayment() {
     fetch(`${apiURL}/cart?username=${currentUser.username}`)
       .then(res => res.json())
       .then(cartItems => {
-        const total = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+        const total = cartItems.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
         totalElement.textContent = total.toFixed(2);
       })
       .catch(err => {
@@ -224,7 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch(`${apiURL}/cart?username=${currentUser.username}`)
         .then(res => res.json())
         .then(cartItems => {
-          
           if (!Array.isArray(cartItems) || cartItems.length === 0) {
             alert("Cart is empty or failed to load.");
             return;
@@ -236,7 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
             phone,
             address,
             paymentMethod: method,
-            
           };
 
           fetch(`${apiURL}/save-order`, {
@@ -293,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function submitReview() {
   const review = document.getElementById("review-text").value.trim();
   if (!review) {
-    alert("Please write something in your review.");
+    alert("Please write something in your complaint box.");
     return;
   }
 
@@ -308,22 +341,60 @@ function submitReview() {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        alert("Thanks for your review!");
+        alert("Thanks for your patience, we will thoroughly review the issue.");
         document.getElementById("review-text").value = '';
       } else {
-        alert(data.message || "Failed to submit review.");
+        alert(data.message || "Failed to submit a complaint.");
       }
     })
     .catch(err => {
-      console.error("Error submitting review:", err);
+      console.error("Error submitting complaint:", err);
       alert("Server error.");
     });
-}
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("admin-link").style.display = "block";
 });
 
 document.getElementById("client-logout").addEventListener("click", () => {
   localStorage.removeItem("currentUser");
-  location.reload(); 
+  location.reload();
 });
+
+function populateScrollBanner() {
+  const scrollTrack = document.getElementById('scroll-track');
+  if (!scrollTrack) return;
+
+  fetch(`${apiURL}/products`)
+    .then(res => res.json())
+    .then(products => {
+      if (!Array.isArray(products) || products.length === 0) return;
+
+      scrollTrack.innerHTML = '';
+
+      const scrollingProducts = [...products, ...products]; 
+
+      scrollingProducts.forEach(product => {
+        const item = document.createElement('div');
+        item.classList.add('scroll-item');
+
+        const imagePath = `${apiURL}/${product.image}`;
+
+        item.innerHTML = `
+          <img src="${imagePath}" alt="${product.name}" />
+          <span>${product.name}</span>
+        `;
+
+        scrollTrack.appendChild(item);
+      });
+    })
+    .catch(err => {
+      console.error("Failed to fetch products for scroll banner:", err);
+    });
+}
+
+window.onload = () => {
+  renderProducts();     
+  populateScrollBanner(); 
+};

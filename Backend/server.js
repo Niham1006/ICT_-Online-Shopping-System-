@@ -32,7 +32,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use(express.static(path.join(__dirname, '../Frontend')));
-
 app.use('/images', express.static(path.join(__dirname, '../Frontend/images')));
 
 app.get('/', (req, res) => {
@@ -59,7 +58,6 @@ app.post('/login', (req, res) => {
 });
 
 // ------------------------- SIGNUP -------------------------
-
 app.post('/signup', (req, res) => {
   const { username, email, password } = req.body;
 
@@ -103,13 +101,18 @@ app.post('/save-order', (req, res) => {
 
     if (!cartItems.length) return res.status(400).send('Cart is empty.');
 
-    const totalPrice = cartItems.reduce((sum, item) => sum + Number(item.price), 0);
+    const totalPrice = cartItems.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity || 1)), 0);
 
-    const orderItems = cartItems.map(item => item.product_name).join(', '); 
+    const orderItems = cartItems.map(item => {
+      const qty = item.quantity || 1;
+      return qty > 1 ? `${item.product_name} x${qty}` : item.product_name;
+    }).join(', ');
+
     cartItems.forEach(item => {
+      const qty = item.quantity || 1;
       db.query(
-        'UPDATE products SET stock = stock - 1 WHERE name = ? AND stock > 0',
-        [item.product_name],
+        'UPDATE products SET stock = stock - ? WHERE name = ? AND stock >= ?',
+        [qty, item.product_name, qty],
         (err2) => {
           if (err2) console.error(`⚠️ Failed to decrease stock for ${item.product_name}:`, err2);
         }
@@ -183,19 +186,20 @@ db.query(insertCart, [username, name, price, image], (err) => {
 });
 
 app.delete('/cart/:id', (req, res) => {
-  const id = req.params.id;
+  const cartItemId = req.params.id;
+  const productName = req.query.productName;
 
-  db.query('SELECT product_name FROM cart WHERE id = ?', [id], (err, results) => {
-    if (err || results.length === 0) {
-      return res.status(500).json({ message: 'Failed to find item to remove' });
-    }
+  const deleteQuery = 'DELETE FROM cart WHERE id = ?';
+  db.query(deleteQuery, [cartItemId], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Delete failed' });
 
-    const productName = results[0].product_name;
+    const restoreStockQuery = 'UPDATE products SET stock = stock + 1 WHERE name = ?';
+    db.query(restoreStockQuery, [productName], (restoreErr) => {
+      if (restoreErr) {
+        return res.status(500).json({ success: false, message: 'Stock restore failed' });
+      }
 
-    db.query('DELETE FROM cart WHERE id = ?', [id], (err) => {
-      if (err) return res.status(500).json({ message: 'Failed to delete item' });
-
-      res.json({ message: 'Item removed and stock restored' });
+      res.json({ success: true, message: 'Item removed and stock restored' });
     });
   });
 });
@@ -218,6 +222,7 @@ function clearCartForUser(username) {
     });
   });
 }
+
 
 // ------------------------- ADMIN LOGIN -------------------------
 app.post('/admin/login', (req, res) => {

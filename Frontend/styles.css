@@ -224,3 +224,134 @@ body {
 .logout-btn:hover {
   background: linear-gradient(to right, #922b21, #c0392b);
 }
+
+.login-info {
+  max-width: 420px;
+  margin: 30px auto;
+  padding: 25px 30px;
+  background: linear-gradient(145deg, #1e272e, #2c3e50);
+  border-radius: 20px;
+  color: #ecf0f1;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: fadeIn 1s ease-in;
+}
+
+.login-info h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #00cec9;
+  letter-spacing: 1px;
+}
+
+.logo-highlight {
+  background: linear-gradient(90deg, #00cec9, #0984e3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tagline {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 18px;
+  color: #dff9fb;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 20px auto;
+  text-align: left;
+  max-width: 300px;
+  font-size: 0.95rem;
+}
+
+.features-list li {
+  margin: 10px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.features-list li::before {
+  content: '✔';
+  position: absolute;
+  left: 0;
+  color: #00b894;
+}
+
+.info-footer {
+  margin-top: 15px;
+  font-size: 0.95rem;
+  color: #dcdde1;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+#available-products-banner {
+  padding: 10px 20px;
+  margin: 30px auto;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+#available-products-banner h3 {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.scroll-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.scroll-track {
+  display: flex;
+  gap: 40px;
+  animation: scrollLeft 60s linear infinite;
+}
+
+.scroll-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+}
+
+.scroll-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 5px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background-color: #222;
+}
+
+@keyframes scrollLeft {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-30%);
+  }
+}
